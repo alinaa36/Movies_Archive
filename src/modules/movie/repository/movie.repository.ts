@@ -26,7 +26,6 @@ export class movieRepository {
       where.stars = { [Op.like]: `%${query.stars}%` };
     }
 
-
     const orderField = query.sort || 'id';
     const orderDirection = query.order || 'ASC';
 
@@ -44,4 +43,16 @@ export class movieRepository {
   async findMovieById(id: number) {
     return await Movie.findByPk(id);
   }
+
+  async updateMovie(id: number, data: CreationAttributes<Movie>) {
+    const movie = await this.findMovieById(id);
+    return movie?.update(data);
+  }
+
+  async deleteMovie(id: number) {
+    const movie = await this.findMovieById(id);
+    await movie?.destroy();
+  }
+
+
 }

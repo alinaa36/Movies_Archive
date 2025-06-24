@@ -3,6 +3,7 @@ import { MovieService } from './services/movie.service';
 import { MovieController } from './controllers/movie.controllers';
 import { Movie } from './models/movie.models';
 import { movieRepository } from './repository/movie.repository';
+import { memoryUpload } from '#middleware/import.middleware.js';
 
 const router = Router();
 const MovieRepository = new movieRepository();
@@ -17,8 +18,20 @@ router.get('/', async (req, res) => {
   await movieController.findAll(req, res);
 });
 
+router.post('/import', memoryUpload.single('file'), async (req, res) => {
+    await movieController.handleFileUpload(req, res);
+});
+
 router.get('/:id', async (req, res) => {
   await movieController.findById(req, res); 
+});
+
+router.delete('/:id', async (req, res) => {
+  await movieController.delete(req, res);
+});
+
+router.patch('/:id', async (req, res) => {
+  await movieController.update(req, res);
 });
 
 export default router;

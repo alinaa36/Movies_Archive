@@ -28,16 +28,18 @@ export class MovieController {
         stars: req.query.stars?.toString(),
         format: req.query.format?.toString(),
         year: req.query.year ? parseInt(req.query.year as string) : undefined,
-        sort: ((): "id" | "title" | "year" | undefined => {
-          const allowedSorts = ["id", "title", "year"];
+        sort: ((): 'id' | 'title' | 'year' | undefined => {
+          const allowedSorts = ['id', 'title', 'year'];
           const sortParam = req.query.sort?.toString();
           return allowedSorts.includes(sortParam as string)
-            ? (sortParam as "id" | "title" | "year")
-            : "id";
+            ? (sortParam as 'id' | 'title' | 'year')
+            : 'id';
         })(),
-        order: ((): "ASC" | "DESC" | undefined => {
+        order: ((): 'ASC' | 'DESC' | undefined => {
           const orderParam = req.query.order?.toString().toUpperCase();
-          return orderParam === "ASC" || orderParam === "DESC" ? orderParam as "ASC" | "DESC" : "ASC";
+          return orderParam === 'ASC' || orderParam === 'DESC'
+            ? (orderParam as 'ASC' | 'DESC')
+            : 'ASC';
         })(),
         limit: req.query.limit ? parseInt(req.query.limit as string) : 20,
         offset: req.query.offset ? parseInt(req.query.offset as string) : 0,
@@ -67,6 +69,38 @@ export class MovieController {
       }
 
       return res.status(200).json(movie);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      return res
+        .status(500)
+        .json({ message: 'Internal Server Error', error: errorMessage });
+    }
+  }
+
+  async handleFileUpload(req: Request, res: Response) {
+    try {
+      const file = req.file;
+      const result = await this.movieService.processFile(file!);
+      return res.status(200).json(result);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      return res.status(400).json({ message });
+    }
+  }
+
+  async update(req: Request, res: Response) {
+    const id = parseInt(req.params.id, 10);
+    const data = req.body;
+    const updatedMovie = await this.movieService.update(id, data);
+    return res.status(200).json(updatedMovie);
+  }
+
+  async delete(req: Request, res: Response) {
+    try {
+      const id = parseInt(req.params.id, 10);
+      await this.movieService.delete(id);
+      return res.status(204).send();
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
