@@ -1,8 +1,8 @@
-import { Sequelize } from 'sequelize';
+import { Movie } from '../modules/movie/models/movie.models';
+import { Sequelize } from 'sequelize-typescript';
 
-const sequelize = new Sequelize({
+export const sequelize = new Sequelize({
   dialect: 'sqlite',
-  storage: './database.sqlite'
+  storage: 'src/database/database.sqlite',
+  models: [Movie],
 });
-
-export default sequelize;
