@@ -5,20 +5,11 @@ import { Request, Response } from 'express';
 
 export class MovieController {
   constructor(private readonly movieService: MovieService) {}
+
   async create(req: Request, res: Response) {
-    try {
-      const data = req.body as CreateMovieDto;
-
-      const movie = await this.movieService.create(data);
-
-      return res.status(201).json(movie);
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-      return res
-        .status(500)
-        .json({ message: 'Internal Server Error', error: errorMessage });
-    }
+    const data = req.body as CreateMovieDto;
+    const movie = await this.movieService.create(data);
+    res.status(201).json(movie); 
   }
 
   async findAll(req: Request, res: Response) {

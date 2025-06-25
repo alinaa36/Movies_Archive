@@ -4,13 +4,15 @@ import { MovieController } from './controllers/movie.controllers';
 import { Movie } from './models/movie.models';
 import { movieRepository } from './repository/movie.repository';
 import { memoryUpload } from '#middleware/import.middleware.js';
+import { validateDto } from '#middleware/validateDto.middleware.js';
+import { CreateMovieDto } from './dtos/create-movie.dto';
 
 const router = Router();
 const MovieRepository = new movieRepository();
 const movieService = new MovieService(MovieRepository);
 const movieController = new MovieController(movieService);
 
-router.post('/', async (req, res) => {
+router.post('/', validateDto(CreateMovieDto), async (req, res) => {
   await movieController.create(req, res);
 });
 

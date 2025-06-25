@@ -19,7 +19,7 @@ export class movieRepository {
     }
 
     if (query.format) {
-      where.format = { [Op.iLike]: query.format }; // iLike для SQLite не обов'язковий
+      where.format = { [Op.iLike]: query.format };
     }
 
     if (query.stars) {

@@ -2,6 +2,7 @@ import express from 'express';
 import 'dotenv/config';
 import { sequelize } from '#database/database.config.js';
 import router from '#modules/movie/movie.route.js';
+import { authRouter } from '#modules/users/user.route.js';
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.get('/', (req, res) => {
 app.use(express.json()); 
 
 app.use('/movies', router);
+app.use('/users', authRouter); // Assuming you have a user route similar to movie route
 
 app.listen(port, async () => {
   await sequelize.sync();
