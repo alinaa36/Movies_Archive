@@ -65,9 +65,10 @@ The project is implemented using **Layered Architecture**, which ensures clear s
 
 ## Environment Variables
 Create .env file in project root:
-
-`PORT=`
-`JWT_SECRET=`
+```
+PORT=
+JWT_SECRET=
+```
 
 ## Docker
 
