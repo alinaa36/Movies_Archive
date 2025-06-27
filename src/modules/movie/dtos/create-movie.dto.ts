@@ -1,4 +1,4 @@
-import { IsString, IsInt, Min, Max, IsNotEmpty } from 'class-validator';
+import { IsString, IsInt, Min, Max, IsNotEmpty, IsArray } from 'class-validator';
 
 export class CreateMovieDto {
 
