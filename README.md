@@ -45,8 +45,8 @@ The project is implemented using **Layered Architecture**, which ensures clear s
 ##  API Endpoints
 
 ### Authentication
-- **POST /api/v1/auth/register** - Register new user
-- **POST /api/v1/auth/login** - Login
+- **POST /api/v1/auth/users** - Register new user
+- **POST /api/v1/auth/sessions** - Login
 
 ### Movies
 - **POST /api/v1/movies** - Add a new movie
