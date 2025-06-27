@@ -63,6 +63,12 @@ The project is implemented using **Layered Architecture**, which ensures clear s
 - `format` - filter by format
 - `sort` - sorting
 
+## Environment Variables
+Create .env file in project root:
+
+PORT=
+JWT_SECRET=
+
 ## Docker
 
 ### Run with Docker
