@@ -1,4 +1,4 @@
-import { User } from '../modules/users/models/user.model';
+import { User } from '../modules/auth/models/user.model';
 import { Movie } from '../modules/movie/models/movie.models';
 import { Sequelize } from 'sequelize-typescript';
 
