@@ -1,6 +1,7 @@
 import { Op, type CreationAttributes } from 'sequelize';
 import { Movie } from '../models/movie.models';
 import { QueryMovieDto } from '../dtos/query-movie.dto';
+import { sequelize } from '#database/database.config.js';
 
 export class movieRepository {
   async createMovie(data: CreationAttributes<Movie>) {
@@ -11,7 +12,7 @@ export class movieRepository {
     const where: any = {};
 
     if (query.title) {
-      where.title = { [Op.like]: `%${query.title}%` };
+      where.title = { [Op.iLike]: `%${query.title}%` };
     }
 
     if (query.year) {
@@ -22,8 +23,8 @@ export class movieRepository {
       where.format = { [Op.iLike]: query.format };
     }
 
-    if (query.stars) {
-      where.stars = { [Op.like]: `%${query.stars}%` };
+    if (query.actor) {
+      where.stars = { [Op.like]: `%${query.actor}%` };
     }
 
     const orderField = query.sort || 'id';
@@ -36,7 +37,9 @@ export class movieRepository {
       where,
       limit,
       offset,
-      order: [[orderField, orderDirection]],
+      order: [
+        [sequelize.fn('lower', sequelize.col(orderField)), orderDirection],
+      ],
     });
   }
 
@@ -53,6 +56,4 @@ export class movieRepository {
     const movie = await this.findMovieById(id);
     await movie?.destroy();
   }
-
-
 }

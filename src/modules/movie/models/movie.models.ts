@@ -12,6 +12,7 @@ import {
   AutoIncrement,
   AllowNull,
 } from 'sequelize-typescript';
+import { MovieFormat } from '../enum/format.enum';
 
 @Table({
   tableName: 'movies',
@@ -35,8 +36,8 @@ export class Movie extends Model<
   declare year: number;
 
   @AllowNull(false)
-  @Column(DataType.STRING)
-  declare format: string;
+  @Column(DataType.ENUM(...Object.values(MovieFormat)))
+  declare format: MovieFormat;
 
   @AllowNull(false)
   @Column(DataType.STRING)

@@ -1,16 +1,26 @@
-import { IsEmail, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsString, Matches, MinLength } from 'class-validator';
+import { AUTH_MESSAGES, AUTH_REGEX } from '../constants/auth.constants';
 
 export class AuthDto {
   @IsEmail()
   email!: string;
+
   @IsString()
+  @Matches(AUTH_REGEX.NAME_REGEX, {
+    message: AUTH_MESSAGES.NAME_MESSAGE,
+  })
   name!: string;
 
   @IsString()
-  @MinLength(6, { message: 'Password must be at least 6 characters long' })
+  @Matches(AUTH_REGEX.PASSWORD_REGEX, {
+    message: AUTH_MESSAGES.PASSWORD_MESSAGE,
+  })
+
   password!: string;
 
   @IsString()
-  @MinLength(6, { message: 'Confirm password must be at least 6 characters long' })
+  @Matches(AUTH_REGEX.PASSWORD_REGEX, {
+    message: AUTH_MESSAGES.PASSWORD_MESSAGE,
+  })
   confirmPassword!: string;
 }

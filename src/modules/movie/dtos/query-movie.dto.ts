@@ -17,7 +17,7 @@ export class QueryMovieDto {
 
   @IsOptional()
   @IsString()
-  stars?: string;
+  actor?: string;
 
   @IsOptional()
   @IsIn(['id', 'title', 'year'])
