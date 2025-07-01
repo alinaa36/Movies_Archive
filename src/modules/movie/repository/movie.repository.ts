@@ -2,6 +2,7 @@ import { Op, type CreationAttributes } from 'sequelize';
 import { Movie } from '../models/movie.models';
 import { QueryMovieDto } from '../dtos/query-movie.dto';
 import { sequelize } from '#database/database.config.js';
+import { Actor } from '#modules/actor/models/actor.model.js';
 
 export class movieRepository {
   async createMovie(data: CreationAttributes<Movie>) {
@@ -12,7 +13,7 @@ export class movieRepository {
     const where: any = {};
 
     if (query.title) {
-      where.title = { [Op.iLike]: `%${query.title}%` };
+      where.title = { [Op.like]: `%${query.title.toLocaleLowerCase()}%` };
     }
 
     if (query.year) {
@@ -20,29 +21,56 @@ export class movieRepository {
     }
 
     if (query.format) {
-      where.format = { [Op.iLike]: query.format };
+      where.format = { [Op.like]: query.format.toLocaleLowerCase() };
     }
 
-    if (query.actor) {
-      where.stars = { [Op.like]: `%${query.actor}%` };
-    }
-
-    const orderField = query.sort || 'id';
-    const orderDirection = query.order || 'ASC';
+    const include = query.actor
+      ? [
+          {
+            model: Actor,
+            where: {
+              name: { [Op.like]: `%${query.actor.toLocaleLowerCase()}%` },
+            },
+            through: { attributes: [] },
+            required: true,
+          },
+        ]
+      : [
+          {
+            model: Actor,
+            through: { attributes: [] },
+          },
+        ];
 
     const limit = query.limit || 20;
     const offset = query.offset || 0;
 
-    return await Movie.findAndCountAll({
+    const result = await Movie.findAndCountAll({
       where,
+      include,
       limit,
       offset,
       order: [
-        [sequelize.fn('lower', sequelize.col(orderField)), orderDirection],
+        [
+          query.sort && query.sort !== 'title'
+            ? sequelize.col(`Movie.${query.sort}`)
+            : 'id',
+          query.order || 'ASC',
+        ],
       ],
     });
-  }
 
+    if (query.sort === 'title') {
+      result.rows.sort((a, b) => {
+        return (
+          a.title.localeCompare(b.title, 'uk', { sensitivity: 'base' }) *
+          (query.order === 'DESC' ? -1 : 1)
+        );
+      });
+    }
+
+    return result;
+  }
   async findMovieById(id: number) {
     return await Movie.findByPk(id);
   }
@@ -55,5 +83,14 @@ export class movieRepository {
   async deleteMovie(id: number) {
     const movie = await this.findMovieById(id);
     await movie?.destroy();
+  }
+
+  async findFullMovie(id: number) {
+    return await Movie.findByPk(id, {
+      include: {
+        model: Actor,
+        through: { attributes: [] },
+      },
+    });
   }
 }

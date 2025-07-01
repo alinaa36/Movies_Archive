@@ -11,8 +11,11 @@ import {
   PrimaryKey,
   AutoIncrement,
   AllowNull,
+  BelongsToMany,
 } from 'sequelize-typescript';
 import { MovieFormat } from '../enum/format.enum';
+import { Actor } from '#modules/actor/models/actor.model.js';
+import { MovieActor } from '#modules/actor/models/movie-actor.model.js';
 
 @Table({
   tableName: 'movies',
@@ -39,7 +42,6 @@ export class Movie extends Model<
   @Column(DataType.ENUM(...Object.values(MovieFormat)))
   declare format: MovieFormat;
 
-  @AllowNull(false)
-  @Column(DataType.STRING)
-  declare stars: string;
+  @BelongsToMany(() => Actor, () => MovieActor)
+  actors!: Actor[];
 }

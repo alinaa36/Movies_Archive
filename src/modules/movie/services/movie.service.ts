@@ -4,12 +4,25 @@ import { Movie } from '../models/movie.models';
 import { movieRepository } from '../repository/movie.repository';
 import { QueryMovieDto } from '../dtos/query-movie.dto';
 import { UpdateMovieDto } from '../dtos/update-movie.dto';
+import { Actor } from '#modules/actor/models/actor.model.js';
+import { stat } from 'fs';
 
 export class MovieService {
   constructor(private readonly MovieRepository: movieRepository) {}
   async create(data: CreateMovieDto): Promise<Movie> {
-    const movieData: CreationAttributes<Movie> = data;
-    return await this.MovieRepository.createMovie(movieData);
+    const { actors, ...movieData } = data;
+
+    const movie = await this.MovieRepository.createMovie({
+      ...movieData,
+      actors: [],
+    });
+
+    const actorInstances = await this.resolveActors(actors);
+    await movie.$set('actors', actorInstances);
+
+    const fullMovie = await this.MovieRepository.findFullMovie(movie.id);
+
+    return fullMovie!;
   }
 
   async findAll(query: QueryMovieDto): Promise<Movie[]> {
@@ -18,7 +31,20 @@ export class MovieService {
   }
 
   async findById(id: number): Promise<Movie | null> {
-    return await this.MovieRepository.findMovieById(id);
+    return await this.MovieRepository.findFullMovie(id);
+  }
+
+  private async resolveActors(actorNames: string[]): Promise<Actor[]> {
+    const actorInstances: Actor[] = [];
+
+    for (const name of actorNames) {
+      const [actor] = await Actor.findOrCreate({
+        where: { name: name.trim() },
+      });
+      actorInstances.push(actor);
+    }
+
+    return actorInstances;
   }
 
   async processFile(file: Express.Multer.File) {
@@ -39,12 +65,24 @@ export class MovieService {
   }
 
   async update(id: number, data: UpdateMovieDto): Promise<Movie> {
-    const movie = await this.MovieRepository.findMovieById(id);
-    if (!movie) {
-      throw new Error(`Movie with id ${id} not found`);
-    }
-    return await movie?.update(data);
+  const movie = await this.MovieRepository.findMovieById(id);
+  if (!movie) {
+    throw new Error(`Movie with id ${id} not found`);
+  }
+
+  const { actors, ...updateData } = data;
+
+  await movie.update(updateData);
+
+  if (actors && actors.length) {
+    const actorInstances = await this.resolveActors(actors);
+    await movie.$set('actors', actorInstances);
+  }
+
+  const fullMovie = await this.MovieRepository.findFullMovie(id);
+  return fullMovie!;
 }
+
 
   async delete(id: number): Promise<void> {
     const movie = await this.MovieRepository.findMovieById(id);
@@ -67,7 +105,9 @@ export class MovieService {
         Title: (val) => (data.title = val),
         'Release Year': (val) => (data.year = parseInt(val)),
         Format: (val) => (data.format = val),
-        Stars: (val) => (data.stars = val),
+        Stars: (val) => {
+          data.actors = val.split(',').map((s) => s.trim());
+        },
       };
 
       for (const line of lines) {
@@ -81,7 +121,7 @@ export class MovieService {
         }
       }
 
-      if (data.title && data.year && data.format && data.stars) {
+      if (data.title && data.year && data.format && data.actors) {
         result.push(data as CreateMovieDto);
       }
     }

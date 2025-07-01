@@ -1,4 +1,4 @@
-import { IsString, IsInt, Min, Max, IsNotEmpty, IsArray, IsEnum, Matches } from 'class-validator';
+import { IsString, IsInt, Min, Max, IsNotEmpty, IsArray, IsEnum, Matches, ArrayNotEmpty } from 'class-validator';
 import { MovieFormat } from '../enum/format.enum';
 import { MOVIE_MESSAGES, MOVIE_REGEX } from '../constants/movie.constants';
 
@@ -19,10 +19,12 @@ export class CreateMovieDto {
   @IsEnum(MovieFormat)
   format!: MovieFormat;
 
-  @IsString()
-  @IsNotEmpty()
+  @IsArray()
+  @IsString({ each: true })
   @Matches(MOVIE_REGEX.STARS_REGEX, {
+    each: true,
     message: MOVIE_MESSAGES.STARS_MESSAGE,
   })
-  stars!: string;
+  @ArrayNotEmpty()
+  actors!: string[];
 }
